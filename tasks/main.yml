@@ -11,8 +11,19 @@
     mode: 0755
 
 - name: Ensure Homebrew installed tools are not shimmed
-  shell: $SHELL -lc "comm -12 <(ls /usr/local/bin) <(echo {{ xcenv_shim_tools | join('\n') }}) | tr '\n' ' '"
+  shell: comm -12 <(ls /usr/local/bin) <(echo {{ xcenv_shim_tools | join(' ') }} | tr ' ' '\n')
+  args:
+    executable: /bin/zsh # default /bin/sh does not handle process substitution but zsh does
   register: homebrew_installed_tools
+
+# Uncomment for troubleshooting
+# - name: Print return information from the previous task
+#   ansible.builtin.debug:
+#     var: homebrew_installed_tools
+
+# - name: Print templating results
+#   ansible.builtin.debug:
+#     msg: "{{ lookup('template', './xcenv.sh.j2') }}"
 
 - name: Ensure xcenv is added to profile system-wide
   blockinfile:
