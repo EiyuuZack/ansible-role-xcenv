@@ -1,0 +1,8 @@
+if [ -d "$HOME/.xcenv" ]; then
+  # Intersecting /usr/local/bin contents and the tools at https://github.com/xcenv/xcenv/blob/master/libexec/xcenv-rehash#L7
+  # returns the tools which have been installed by Homebrew which are preferable to /usr/bin and thus should not be shimmed
+  export XCENV_DO_NOT_SHIM_LIST="{{ homebrew_installed_tools }}"
+  export XCENV_ROOT=$HOME/.xcenv
+  # xcenv lacks a --no-rehash option
+  eval "$(xcenv init -)"
+fi

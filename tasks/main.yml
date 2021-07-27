@@ -1,0 +1,28 @@
+---
+- name: Ensure xcenv is installed
+  homebrew:
+    name: xcenv
+    state: present
+
+- name: 'Ensure {{ xcenv_root }} directory is created'
+  file:
+    path: '{{ xcenv_root }}'
+    state: directory
+    mode: 0755
+
+- name: Ensure Homebrew installed tools are not shimmed
+  shell: $SHELL -lc "comm -12 <(ls /usr/local/bin) <(echo {{ xcenv_shim_tools | join('\n') }}) | tr '\n' ' '"
+  register: homebrew_installed_tools
+
+- name: Ensure xcenv is added to profile system-wide
+  blockinfile:
+    path: /etc/zprofile
+    block: "{{ lookup('template', 'xcenv.sh.j2') }}"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK -- XCENV"
+  become: yes
+
+- name: 'Ensure Xcode {{ xcenv_default_xcode }} is default'
+  shell: $SHELL -lc 'xcenv global {{ xcenv_default_xcode|quote }}'
+
+- name: Ensure shims are updated
+  shell: $SHELL -lc 'xcenv rehash'
